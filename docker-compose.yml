@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: ivan
+      POSTGRES_PASSWORD: superpassword123
+      POSTGRES_DB: nexus_stock
+    ports:
+      - '5432:5432'
