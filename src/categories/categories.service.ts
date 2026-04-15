@@ -35,7 +35,12 @@ export class CategoriesService {
 
   async findOne(id: string) {
     const cat = await this.prisma.category.findUnique({
-      where: {id}
+      where: {id},
+      include: {
+        _count: {
+          select: {products: true}
+        }
+      }
     })
 
     if(!cat){
@@ -45,11 +50,32 @@ export class CategoriesService {
     return cat
   }
 
-  update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    return `This action updates a #${id} category`;
+  async update(id: string, updateCategoryDto: UpdateCategoryDto) {
+    try {
+      return await this.prisma.category.update({
+        where: { id },
+        data: updateCategoryDto,
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+        throw new NotFoundException(`Category with id ${id} not found`);
+      }
+      throw error;
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} category`;
+  async remove(id: string) {
+    const cat = await this.findOne(id)
+
+    if(cat._count.products > 0){
+      throw new ConflictException(
+        `No se puede eliminar la categoria porque tiene ${cat._count.products} productos asociados`
+      )
+    }
+
+    return await this.prisma.category.delete({
+      where: {id}
+    })
+
   }
 }

@@ -42,21 +42,24 @@ Lógica: No se puede eliminar una categoría si tiene productos asociados (Integ
 
 2. Sistema de Movimientos de Stock
 
-No quiero que solo edites el número de stock. Quiero un endpoint de "Ajuste de Inventario":
+Endpoint de "Ajuste de Inventario":
 Debe registrar si es una ENTRADA (compra a proveedor) o SALIDA (venta/pérdida).
+
 Lógica: Si es una SALIDA y no hay stock suficiente, debe lanzar una BadRequestException.
+
 Plus: Cada movimiento debe quedar registrado en una tabla de InventoryLog (Historial).
 
 3. Búsquedas y Filtros (Query Params)
 
 Endpoint para listar productos que permita filtrar por categoría y por rango de precio (min/max).
+
 Endpoint de "Alertas": que devuelva solo los productos cuyo stock sea menor a 5 unidades.
 
 4. Arquitectura y Seguridad
 
 Uso de DTOs específicos para creación y actualización.
 Implementar un Global Pipe para que los DTOs limpien data basura (whitelist: true).
-Uso de un Interfase/Service para manejar la lógica de negocio, no en el controlador.
+Uso de un Interface/Service para manejar la lógica de negocio, no en el controlador.
 
 
 ## Description
