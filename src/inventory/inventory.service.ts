@@ -1,26 +1,63 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateInventoryDto } from './dto/create-inventory.dto';
-import { UpdateInventoryDto } from './dto/update-inventory.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { MovementType } from '@prisma/client';
 
 @Injectable()
 export class InventoryService {
-  create(createInventoryDto: CreateInventoryDto) {
-    return 'This action adds a new inventory';
+
+  constructor(private prisma: PrismaService){}
+
+
+  async create(createInventoryDto: CreateInventoryDto) {
+    const {productId, quantity, type, reason} = createInventoryDto
+
+    return await this.prisma.$transaction(async (tx) => {
+
+      const product = await tx.product.findUniqueOrThrow({
+        where: { id: productId }
+      });
+
+      if(product.stock < quantity && type === MovementType.OUT) {
+        throw new BadRequestException(
+          `Stock insuficiente. Disponible: ${product.stock}, Solicitado: ${quantity}`
+        )
+      }
+
+      const newStock = type === MovementType.IN
+        ? product.stock + quantity
+        : product.stock - quantity;
+
+      const updatedProduct = await tx.product.update({
+        where: {id: productId},
+        data: {stock: newStock}
+      })
+
+      const log = await tx.inventoryLog.create({
+        data: {
+          type,
+          quantity,
+          reason: reason || (type === MovementType.IN ? 'Entrada manual' : 'Salida Manual'),
+          productId
+        }
+      })
+
+      return {
+        message: "Ajuste realizado con exito",
+        newStock: updatedProduct.stock,
+        logId: log.id
+      }
+      
+    })
   }
 
-  findAll() {
-    return `This action returns all inventory`;
+  async findAll() {
+    return await this.prisma.inventoryLog.findMany()
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} inventory`;
-  }
-
-  update(id: number, updateInventoryDto: UpdateInventoryDto) {
-    return `This action updates a #${id} inventory`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} inventory`;
+  async findOne(id: string) {
+    return await this.prisma.inventoryLog.findFirstOrThrow({
+      where: {id}
+    })
   }
 }
