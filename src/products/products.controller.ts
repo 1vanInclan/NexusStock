@@ -13,6 +13,11 @@ export class ProductsController {
     return this.productsService.create(createProductDto);
   }
 
+  @Get('/low-stock')
+  getLowStock(){
+    return this.productsService.getLowStock()
+  }
+
   @Get()
   findAll(@Query() filterDTO: FilterProductsDto) {
     const {categoryId, minPrice, maxPrice} = filterDTO

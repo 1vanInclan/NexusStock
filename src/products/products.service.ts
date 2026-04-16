@@ -54,4 +54,21 @@ export class ProductsService {
       where: { id }
     })
   }
+
+  async getLowStock(){
+    const min = 5;
+    return await this.prisma.product.findMany({
+      where: {
+        stock: {
+          lte: min
+        },
+      },
+      include: {
+        category: {select: {name: true}}
+      },
+      orderBy: {
+        stock: 'asc'
+      }
+    })
+  }
 }
