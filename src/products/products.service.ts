@@ -15,12 +15,18 @@ export class ProductsService {
     })
   }
 
-  async findAll() {
+  async findAll(categoryId?: string, minPrice?: number, maxPrice?: number ) {
     return await this.prisma.product.findMany({
+      where: {
+        categoryId: categoryId || undefined,
+
+        price: {
+          gte: minPrice || undefined,
+          lte: maxPrice || undefined,
+        },
+      },
       include: {
-        category: {
-          select: {name: true}
-        }
+        category: {select: {name: true}}
       }
     })
   }
