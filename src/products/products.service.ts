@@ -1,21 +1,28 @@
 import { Injectable } from '@nestjs/common';
-import { CreateProductDto } from './dto/create-product.dto';
+import { CreateProductDto, CreateProductsBulkDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class ProductsService {
-
-
-  constructor(private prisma: PrismaService){}
+  constructor(private prisma: PrismaService) {}
 
   async create(createProductDto: CreateProductDto) {
     return await this.prisma.product.create({
-      data: createProductDto
-    })
+      data: createProductDto,
+    });
   }
 
-  async findAll(categoryId?: string, minPrice?: number, maxPrice?: number ) {
+  async createMany(createProductsBulkDto: CreateProductsBulkDto) {
+    const { products } = createProductsBulkDto;
+
+    return await this.prisma.product.createMany({
+      data: products,
+      skipDuplicates: true,
+    });
+  }
+
+  async findAll(categoryId?: string, minPrice?: number, maxPrice?: number) {
     return await this.prisma.product.findMany({
       where: {
         categoryId: categoryId || undefined,
@@ -26,9 +33,9 @@ export class ProductsService {
         },
       },
       include: {
-        category: {select: {name: true}}
-      }
-    })
+        category: { select: { name: true } },
+      },
+    });
   }
 
   async findOne(id: string) {
@@ -36,39 +43,39 @@ export class ProductsService {
       where: { id },
       include: {
         category: {
-          select: {name: true}
-        }
-      }
-    })
+          select: { name: true },
+        },
+      },
+    });
   }
 
   async update(id: string, updateProductDto: UpdateProductDto) {
     return await this.prisma.product.update({
       where: { id },
-      data: updateProductDto
-    })
+      data: updateProductDto,
+    });
   }
 
   async remove(id: string) {
     return await this.prisma.product.delete({
-      where: { id }
-    })
+      where: { id },
+    });
   }
 
-  async getLowStock(){
+  async getLowStock() {
     const min = 5;
     return await this.prisma.product.findMany({
       where: {
         stock: {
-          lte: min
+          lte: min,
         },
       },
       include: {
-        category: {select: {name: true}}
+        category: { select: { name: true } },
       },
       orderBy: {
-        stock: 'asc'
-      }
-    })
+        stock: 'asc',
+      },
+    });
   }
 }

@@ -1,5 +1,5 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { CreateCategoryDto } from './dto/create-category.dto';
+import { CreateCategoriesBulkDto, CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 
@@ -54,4 +54,15 @@ export class CategoriesService {
     });
 
   }
+
+  async createMany(createCategoriesBulkDto: CreateCategoriesBulkDto) {
+    const { categories } = createCategoriesBulkDto;
+
+    return await this.prisma.category.createMany({
+      data: categories,
+      skipDuplicates: true
+    })
+  }
+
+  
 }

@@ -1,9 +1,9 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { ProductsService } from './products.service';
-import { CreateProductDto } from './dto/create-product.dto';
+import { CreateProductDto, CreateProductsBulkDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { FilterProductsDto } from './dto/filter-products.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('products')
 @Controller('products')
@@ -13,6 +13,12 @@ export class ProductsController {
   @Post()
   create(@Body() createProductDto: CreateProductDto) {
     return this.productsService.create(createProductDto);
+  }
+
+  @Post('bulk')
+  @ApiOperation({ summary: "Creacion masiva de productos" })
+  createMany(@Body() createProductsBulkDto: CreateProductsBulkDto){
+    return this.productsService.createMany(createProductsBulkDto)
   }
 
   @Get('/low-stock')

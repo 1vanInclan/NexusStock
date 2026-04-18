@@ -1,5 +1,6 @@
+import { ApiProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
-import { IsInt, IsNotEmpty, IsNumber, IsPositive, IsString, IsUUID, MaxLength, Min } from "class-validator";
+import { IsArray, IsInt, IsNotEmpty, IsNumber, IsPositive, IsString, IsUUID, MaxLength, Min, ValidateNested } from "class-validator";
 
 export class CreateProductDto {
 
@@ -28,4 +29,12 @@ export class CreateProductDto {
   @IsUUID()
   @IsNotEmpty({message: 'No puede ir vacio el categoryId'})
   categoryId: string;
+}
+
+export class CreateProductsBulkDto {
+  @ApiProperty({ type: [CreateProductDto] })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateProductDto)
+  products: CreateProductDto[];
 }
